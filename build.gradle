@@ -1,0 +1,59 @@
+buildscript {
+    repositories {
+        jcenter()
+        google()
+        gradlePluginPortal()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+    }
+}
+
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
+
+repositories {
+    mavenCentral()
+}
+
+
+kotlin {
+    targets {
+        fromPreset(presets.macosX64, 'macos')
+        fromPreset(presets.mingwX64, 'mingw')
+        fromPreset(presets.iosX64, 'iosX64')
+        fromPreset(presets.iosArm64, 'iosArm64')
+        fromPreset(presets.iosArm32, 'iosArm32')   
+    }
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
+            }
+        }
+        nativeCommonMain { 
+            dependsOn commonMain
+            dependencies {}
+        }
+        appleMain {
+            dependsOn nativeCommonMain
+            dependencies {}
+        }
+        
+        configure([iosArm32Main]) {
+            dependsOn nativeCommonMain
+        }
+
+        configure([mingwMain]) {
+            dependsOn nativeCommonMain
+        }
+
+        configure([iosX64Main, iosArm64Main, macosMain]) {
+            dependsOn appleMain
+        }
+    }
+}
+
+configurations {
+    compileClasspath
+}
